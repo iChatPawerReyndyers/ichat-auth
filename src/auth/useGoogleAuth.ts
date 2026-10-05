@@ -4,26 +4,23 @@ import {
   statusCodes,
   isErrorWithCode,
 } from "@react-native-google-signin/google-signin";
-import {
-  GOOGLE_ANDROID_CLIENT_ID,
-  GOOGLE_IOS_CLIENT_ID,
-  GOOGLE_WEB_CLIENT_ID,
-} from "../config/appConfig";
+import { useAuthSdkConfig } from "../sdk/AuthSdkProvider";
 
-let configured = false;
-function ensureConfigured() {
-  if (configured) return;
+let configuredClientIds = "";
+function ensureConfigured(webClientId?: string, iosClientId?: string) {
+  const configKey = `${webClientId ?? ""}|${iosClientId ?? ""}`;
+  if (configuredClientIds === configKey) return;
   GoogleSignin.configure({
     // webClientId is what the backend verifies the token's `aud` against —
     // required even on native, per @react-native-google-signin/google-signin's
     // docs, to get an idToken back at all.
-    webClientId: GOOGLE_WEB_CLIENT_ID || undefined,
-    iosClientId: GOOGLE_IOS_CLIENT_ID || undefined,
-    // GOOGLE_ANDROID_CLIENT_ID isn't passed here — on Android the client ID
+    webClientId: webClientId || undefined,
+    iosClientId: iosClientId || undefined,
+    // The Android client ID isn't passed here — on Android the client ID
     // instead comes from google-services.json / the SHA-1 fingerprint
     // registered in Google Cloud Console (see OAUTH_SETUP.md).
   });
-  configured = true;
+  configuredClientIds = configKey;
 }
 
 /**
@@ -36,8 +33,9 @@ function ensureConfigured() {
  * backend/docs/OAUTH_SETUP.md.
  */
 export function useGoogleAuth(onIdToken: (idToken: string) => void) {
+  const { google } = useAuthSdkConfig();
   const signIn = useCallback(async () => {
-    ensureConfigured();
+    ensureConfigured(google?.webClientId, google?.iosClientId);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const result = await GoogleSignin.signIn();
@@ -53,7 +51,7 @@ export function useGoogleAuth(onIdToken: (idToken: string) => void) {
       }
       throw error;
     }
-  }, [onIdToken]);
+  }, [google?.webClientId, google?.iosClientId, onIdToken]);
 
   return { signIn };
 }

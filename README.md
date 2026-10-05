@@ -1,6 +1,73 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# `@ichatpawer/auth-sdk`
 
-# Getting Started
+Reusable authentication UI and API client for React Native CLI apps. The SDK
+exports an embeddable `AuthFlow`; it does not create a `NavigationContainer`.
+
+## Install from Git
+
+```sh
+npm install git+https://github.com/iChatPawerReyndyers/ichat-auth.git#main
+```
+
+For release builds, pin the dependency to a tag or commit SHA instead of the
+moving `main` branch. The host must use React 19.1+ and React Native 0.86+.
+
+## Use in a host app
+
+```tsx
+import { AuthFlow, AuthSdkProvider } from "@ichatpawer/auth-sdk";
+
+export function Login() {
+	return (
+		<AuthSdkProvider
+			config={{
+				apiBaseUrl: "https://auth-be-1qyi.onrender.com/api/auth",
+				appId: "your-app-id",
+				primaryColor: "#F5A623",
+				socialLoginEnabled: false,
+				onAuthenticated: (response) => {
+					// Continue only after the SDK completes the required profile gate.
+					console.log(response.username, response.profileComplete);
+				},
+				onCancel: () => {},
+			}}
+		>
+			<AuthFlow />
+		</AuthSdkProvider>
+	);
+}
+```
+
+`apiBaseUrl` must include `/api/auth`. The provider supplies API URL, `appId`,
+brand color, OAuth configuration, and callbacks. `AuthFlow` manages login,
+registration, forgot-password navigation internally and can be rendered inside
+the host's existing shell. Its success response includes username and profile
+status, but currently no numeric user ID or JWT.
+
+## Native peer dependencies
+
+Install the SDK's peer dependencies in the host app: `@react-native-community/blur`,
+`@react-native-google-signin/google-signin`, `react-native-fbsdk-next`, React,
+and React Native. Android autolinking is handled by the CLI; rebuild the app
+after installation. For iOS, run `npx pod-install` and rebuild.
+
+Google/Facebook buttons are disabled unless `socialLoginEnabled` is true and
+the corresponding client/app ID is configured. Provider-specific files and
+credentials must also be configured in the host's native projects. Never put
+backend secrets or database credentials in the client.
+
+## Backend and host identity limitation
+
+The shared backend currently returns no JWT/session token and no Cartculate
+numeric user ID. Hosts that require either for their own protected APIs must
+first add a compatible identity/token contract; the SDK does not fabricate
+one. Add a host's `appId` to the backend free-client list if that app should
+bypass its subscription check. Password-reset SMS requires a configured SMS
+provider on the backend.
+
+## Demo app development
+
+### Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 

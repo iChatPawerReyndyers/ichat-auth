@@ -1,36 +1,47 @@
 {
-  "name": "AuthApp",
-  "version": "1.0.0",
-  "private": true,
+  "name": "@ichatpawer/auth-sdk",
+  "version": "0.1.0",
+  "private": false,
+  "main": "src/index.ts",
+  "react-native": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "start": "react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "pod-install": "cd ios && pod install"
+    "pod-install": "cd ios && pod install",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@react-native-community/blur": "^4.4.1",
+    "@react-native-google-signin/google-signin": "^13.1.0",
+    "react": ">=19.1.0",
+    "react-native": ">=0.86.0",
+    "react-native-fbsdk-next": "^13.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/blur": "^4.4.1",
+    "@react-native-community/cli": "latest",
+    "@react-native/babel-preset": "0.87.1",
+    "@react-native/metro-config": "0.87.1",
+    "@react-native/typescript-config": "0.87.1",
     "@react-native-google-signin/google-signin": "^13.1.0",
     "@react-navigation/native": "^7.0.0",
     "@react-navigation/native-stack": "^7.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-test-renderer": "^19.3.0",
     "react": "19.2.3",
     "react-native": "0.87.1",
     "react-native-fbsdk-next": "^13.1.0",
     "react-native-safe-area-context": "^5.8.1",
     "react-native-screens": "^4.27.0",
-    "react-native-vector-icons": "^10.2.0"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.25.0",
-    "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "latest",
-    "@react-native/babel-preset": "0.87.1",
-    "@react-native/metro-config": "0.87.1",
-    "@react-native/typescript-config": "0.87.1",
-    "@types/jest": "^30.0.0",
-    "@types/react": "^19.2.0",
-    "@types/react-native-vector-icons": "^6.4.18",
-    "@types/react-test-renderer": "^19.3.0",
     "react-test-renderer": "^19.2.3",
     "typescript": "~5.9.3"
   }

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../types/auth";
-import { login } from "../api/authApi";
+import type { AuthFlowNavigation } from "../sdk/types";
+import { useAuthApi } from "../api/authApi";
 import { colors, spacing } from "../theme/neumorphic";
 import NeumorphicCard from "../components/NeumorphicCard";
 import NeumorphicInput from "../components/NeumorphicInput";
@@ -13,11 +12,16 @@ import CompleteProfileModal from "../components/CompleteProfileModal";
 import type { AuthResponse } from "../types/auth";
 import { usePrimaryColor } from "../theme/ThemeContext";
 import { useNeumorphicDialog } from "../components/NeumorphicDialogProvider";
+import { useAuthSdkConfig } from "../sdk/AuthSdkProvider";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Login">;
+interface Props {
+  navigation: AuthFlowNavigation;
+}
 
 export default function LoginScreen({ navigation }: Props) {
   const showDialog = useNeumorphicDialog();
+  const { onAuthenticated } = useAuthSdkConfig();
+  const { login } = useAuthApi();
   const primaryColor = usePrimaryColor();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +37,7 @@ export default function LoginScreen({ navigation }: Props) {
       setIncompleteUsername(res.username);
       return;
     }
-    showDialog("Welcome", res.message);
+    showDialog("Welcome", res.message, () => onAuthenticated?.(res));
   };
 
   const handleLogin = async () => {
@@ -102,9 +106,9 @@ export default function LoginScreen({ navigation }: Props) {
       <CompleteProfileModal
         visible={incompleteUsername !== null}
         username={incompleteUsername ?? ""}
-        onComplete={() => {
+        onComplete={(response) => {
           setIncompleteUsername(null);
-          showDialog("Welcome", "Your profile is all set.");
+          showDialog("Welcome", response.message, () => onAuthenticated?.(response));
         }}
       />
     </View>

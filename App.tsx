@@ -7,8 +7,17 @@ import RegisterScreen from "./src/screens/RegisterScreen";
 import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
 import type { RootStackParamList } from "./src/types/auth";
 import { colors } from "./src/theme/neumorphic";
-import { AuthThemeProvider, usePrimaryColor } from "./src/theme/ThemeContext";
-import NeumorphicDialogProvider from "./src/components/NeumorphicDialogProvider";
+import { usePrimaryColor } from "./src/theme/ThemeContext";
+import AuthSdkProvider from "./src/sdk/AuthSdkProvider";
+import {
+  AUTH_API_BASE_URL,
+  APP_ID,
+  FACEBOOK_APP_ID,
+  GOOGLE_ANDROID_CLIENT_ID,
+  GOOGLE_IOS_CLIENT_ID,
+  GOOGLE_WEB_CLIENT_ID,
+  SOCIAL_LOGIN_ENABLED,
+} from "./src/config/appConfig";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -20,11 +29,22 @@ interface AppProps {
 
 export default function App({ primaryColor }: AppProps) {
   return (
-    <AuthThemeProvider primaryColor={primaryColor}>
-      <NeumorphicDialogProvider>
-        <AppNavigator />
-      </NeumorphicDialogProvider>
-    </AuthThemeProvider>
+    <AuthSdkProvider
+      config={{
+        apiBaseUrl: AUTH_API_BASE_URL,
+        appId: APP_ID,
+        primaryColor,
+        socialLoginEnabled: SOCIAL_LOGIN_ENABLED,
+        google: {
+          webClientId: GOOGLE_WEB_CLIENT_ID,
+          iosClientId: GOOGLE_IOS_CLIENT_ID,
+          androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+        },
+        facebook: { appId: FACEBOOK_APP_ID },
+      }}
+    >
+      <AppNavigator />
+    </AuthSdkProvider>
   );
 }
 
@@ -48,9 +68,21 @@ function AppNavigator() {
     <NavigationContainer theme={navTheme}>
       <StatusBar barStyle="dark-content" />
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="Login">
+          {({ navigation }) => (
+            <LoginScreen navigation={{ navigate: (screen) => navigation.navigate(screen) }} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="Register">
+          {({ navigation }) => (
+            <RegisterScreen navigation={{ navigate: (screen) => navigation.navigate(screen) }} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="ForgotPassword">
+          {({ navigation }) => (
+            <ForgotPasswordScreen navigation={{ navigate: (screen) => navigation.navigate(screen) }} />
+          )}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

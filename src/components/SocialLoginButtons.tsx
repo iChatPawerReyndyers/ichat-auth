@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { BlurView } from "@react-native-community/blur";
 import { colors, radii, raisedShadow, spacing } from "../theme/neumorphic";
-import { SOCIAL_LOGIN_ENABLED } from "../config/appConfig";
 import { useGoogleAuth } from "../auth/useGoogleAuth";
 import { useFacebookAuth } from "../auth/useFacebookAuth";
-import { loginWithGoogle, loginWithFacebook } from "../api/authApi";
+import { useAuthApi } from "../api/authApi";
 import type { AuthResponse } from "../types/auth";
 import { useNeumorphicDialog } from "./NeumorphicDialogProvider";
+import { useAuthSdkConfig } from "../sdk/AuthSdkProvider";
 
 interface Props {
   onSuccess: (res: AuthResponse) => void;
@@ -15,8 +15,11 @@ interface Props {
 
 export default function SocialLoginButtons({ onSuccess }: Props) {
   const showDialog = useNeumorphicDialog();
+  const { loginWithGoogle, loginWithFacebook } = useAuthApi();
+  const { socialLoginEnabled = false, google, facebook } = useAuthSdkConfig();
   const [loadingProvider, setLoadingProvider] = useState<"google" | "facebook" | null>(null);
-  const socialDisabled = !SOCIAL_LOGIN_ENABLED;
+  const googleDisabled = !socialLoginEnabled || !google?.webClientId;
+  const facebookDisabled = !socialLoginEnabled || !facebook?.appId;
 
   const handleAuthResult = async (
     provider: "google" | "facebook",
@@ -67,10 +70,10 @@ export default function SocialLoginButtons({ onSuccess }: Props) {
 
       <View style={[styles.buttonShadow, styles.googleButton, raisedShadow]}>
         <TouchableOpacity
-          style={[styles.button, styles.googleButton, socialDisabled && styles.disabledButton]}
+          style={[styles.button, styles.googleButton, googleDisabled && styles.disabledButton]}
           onPress={handleGooglePress}
-          disabled={socialDisabled || loadingProvider !== null}
-          accessibilityState={{ disabled: socialDisabled || loadingProvider !== null }}
+          disabled={googleDisabled || loadingProvider !== null}
+          accessibilityState={{ disabled: googleDisabled || loadingProvider !== null }}
           activeOpacity={0.85}
         >
           {loadingProvider === "google" ? (
@@ -81,16 +84,16 @@ export default function SocialLoginButtons({ onSuccess }: Props) {
               <Text style={styles.googleText}>Continue with Google</Text>
             </>
           )}
-          {socialDisabled && <BlurView pointerEvents="none" style={StyleSheet.absoluteFill} blurType="light" blurAmount={1} reducedTransparencyFallbackColor={colors.background} />}
+          {googleDisabled && <BlurView pointerEvents="none" style={StyleSheet.absoluteFill} blurType="light" blurAmount={1} reducedTransparencyFallbackColor={colors.background} />}
         </TouchableOpacity>
       </View>
 
       <View style={[styles.buttonShadow, styles.facebookButton, raisedShadow]}>
         <TouchableOpacity
-          style={[styles.button, styles.facebookButton, socialDisabled && styles.disabledButton]}
+          style={[styles.button, styles.facebookButton, facebookDisabled && styles.disabledButton]}
           onPress={handleFacebookPress}
-          disabled={socialDisabled || loadingProvider !== null}
-          accessibilityState={{ disabled: socialDisabled || loadingProvider !== null }}
+          disabled={facebookDisabled || loadingProvider !== null}
+          accessibilityState={{ disabled: facebookDisabled || loadingProvider !== null }}
           activeOpacity={0.85}
         >
           {loadingProvider === "facebook" ? (
@@ -103,7 +106,7 @@ export default function SocialLoginButtons({ onSuccess }: Props) {
               <Text style={styles.facebookText}>Continue with Facebook</Text>
             </>
           )}
-          {socialDisabled && <BlurView pointerEvents="none" style={StyleSheet.absoluteFill} blurType="light" blurAmount={1} reducedTransparencyFallbackColor={colors.background} />}
+          {facebookDisabled && <BlurView pointerEvents="none" style={StyleSheet.absoluteFill} blurType="light" blurAmount={1} reducedTransparencyFallbackColor={colors.background} />}
         </TouchableOpacity>
       </View>
     </View>

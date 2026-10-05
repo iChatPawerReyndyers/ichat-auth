@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../types/auth";
-import { forgotPassword, resetPassword } from "../api/authApi";
+import type { AuthFlowNavigation } from "../sdk/types";
+import { useAuthApi } from "../api/authApi";
 import { colors, spacing } from "../theme/neumorphic";
 import { usePrimaryColor } from "../theme/ThemeContext";
 import NeumorphicCard from "../components/NeumorphicCard";
@@ -10,12 +9,15 @@ import NeumorphicInput from "../components/NeumorphicInput";
 import NeumorphicButton from "../components/NeumorphicButton";
 import { useNeumorphicDialog } from "../components/NeumorphicDialogProvider";
 
-type Props = NativeStackScreenProps<RootStackParamList, "ForgotPassword">;
+interface Props {
+  navigation: AuthFlowNavigation;
+}
 
 type Step = "request" | "verify";
 
 export default function ForgotPasswordScreen({ navigation }: Props) {
   const showDialog = useNeumorphicDialog();
+  const { forgotPassword, resetPassword } = useAuthApi();
   const primaryColor = usePrimaryColor();
   const [step, setStep] = useState<Step>("request");
   const [username, setUsername] = useState("");

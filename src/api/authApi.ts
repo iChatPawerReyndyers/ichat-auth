@@ -1,3 +1,4 @@
+import { useAuthSdkConfig } from "../sdk/AuthSdkProvider";
 import {
   AuthResponse,
   CompleteProfilePayload,
@@ -8,12 +9,10 @@ import {
   RegisterPayload,
   ResetPasswordPayload,
 } from "../types/auth";
-import { APP_ID } from "../config/appConfig";
 
-const BASE_URL = "https://auth-be-1qyi.onrender.com/api/auth";
-
-async function postJson<T>(path: string, body: T): Promise<AuthResponse> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+async function postJson<T>(baseUrl: string, path: string, body: T): Promise<AuthResponse> {
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const response = await fetch(`${normalizedBaseUrl}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -31,35 +30,22 @@ async function postJson<T>(path: string, body: T): Promise<AuthResponse> {
   return data as AuthResponse;
 }
 
-// login/loginWithGoogle/loginWithFacebook take the caller's payload WITHOUT
-// appId and inject it here from config — so screens don't need to know
-// about it. appId tells the backend which app is asking, which decides
-// whether the subscription gate applies (see app.clients.free-ids).
+export function useAuthApi() {
+  const { apiBaseUrl, appId } = useAuthSdkConfig();
 
-export function login(payload: Omit<LoginPayload, "appId">): Promise<AuthResponse> {
-  return postJson("/login", { ...payload, appId: APP_ID });
-}
-
-export function register(payload: RegisterPayload): Promise<AuthResponse> {
-  return postJson("/register", payload);
-}
-
-export function loginWithGoogle(payload: Omit<GoogleLoginPayload, "appId">): Promise<AuthResponse> {
-  return postJson("/oauth/google", { ...payload, appId: APP_ID });
-}
-
-export function loginWithFacebook(payload: Omit<FacebookLoginPayload, "appId">): Promise<AuthResponse> {
-  return postJson("/oauth/facebook", { ...payload, appId: APP_ID });
-}
-
-export function forgotPassword(payload: ForgotPasswordPayload): Promise<AuthResponse> {
-  return postJson("/password/forgot", payload);
-}
-
-export function resetPassword(payload: ResetPasswordPayload): Promise<AuthResponse> {
-  return postJson("/password/reset", payload);
-}
-
-export function completeProfile(payload: CompleteProfilePayload): Promise<AuthResponse> {
-  return postJson("/profile/complete", payload);
+  return {
+    login: (payload: Omit<LoginPayload, "appId">) =>
+      postJson(apiBaseUrl, "/login", { ...payload, appId }),
+    register: (payload: RegisterPayload) => postJson(apiBaseUrl, "/register", payload),
+    loginWithGoogle: (payload: Omit<GoogleLoginPayload, "appId">) =>
+      postJson(apiBaseUrl, "/oauth/google", { ...payload, appId }),
+    loginWithFacebook: (payload: Omit<FacebookLoginPayload, "appId">) =>
+      postJson(apiBaseUrl, "/oauth/facebook", { ...payload, appId }),
+    forgotPassword: (payload: ForgotPasswordPayload) =>
+      postJson(apiBaseUrl, "/password/forgot", payload),
+    resetPassword: (payload: ResetPasswordPayload) =>
+      postJson(apiBaseUrl, "/password/reset", payload),
+    completeProfile: (payload: CompleteProfilePayload) =>
+      postJson(apiBaseUrl, "/profile/complete", payload),
+  };
 }

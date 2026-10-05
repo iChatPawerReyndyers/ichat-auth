@@ -15,6 +15,7 @@ export const IS_DEV_MODE = false;
 // Calculator included, requires an active subscription). Set this to
 // whichever app this particular build actually is.
 export const APP_ID = "stickies";
+export const AUTH_API_BASE_URL = "https://auth-be-1qyi.onrender.com/api/auth";
 
 // --- Google / Facebook OAuth ---
 // Set to false to show the Google/Facebook buttons in a disabled, blurred

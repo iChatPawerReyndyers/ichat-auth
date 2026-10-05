@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../types/auth";
-import { register } from "../api/authApi";
+import type { AuthFlowNavigation } from "../sdk/types";
+import { useAuthApi } from "../api/authApi";
 import { colors, spacing } from "../theme/neumorphic";
 import NeumorphicCard from "../components/NeumorphicCard";
 import NeumorphicInput from "../components/NeumorphicInput";
@@ -13,11 +12,16 @@ import CompleteProfileModal from "../components/CompleteProfileModal";
 import type { AuthResponse } from "../types/auth";
 import { usePrimaryColor } from "../theme/ThemeContext";
 import { useNeumorphicDialog } from "../components/NeumorphicDialogProvider";
+import { useAuthSdkConfig } from "../sdk/AuthSdkProvider";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Register">;
+interface Props {
+  navigation: AuthFlowNavigation;
+}
 
 export default function RegisterScreen({ navigation }: Props) {
   const showDialog = useNeumorphicDialog();
+  const { onAuthenticated } = useAuthSdkConfig();
+  const { register } = useAuthApi();
   const primaryColor = usePrimaryColor();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -38,7 +42,10 @@ export default function RegisterScreen({ navigation }: Props) {
       setIncompleteUsername(res.username);
       return;
     }
-    showDialog("Welcome", res.message, () => navigation.navigate("Login"));
+    showDialog("Welcome", res.message, () => {
+      onAuthenticated?.(res);
+      navigation.navigate("Login");
+    });
   };
 
   const handleRegister = async () => {
@@ -180,9 +187,12 @@ export default function RegisterScreen({ navigation }: Props) {
       <CompleteProfileModal
         visible={incompleteUsername !== null}
         username={incompleteUsername ?? ""}
-        onComplete={() => {
+        onComplete={(response) => {
           setIncompleteUsername(null);
-          showDialog("Welcome", "Your profile is all set.", () => navigation.navigate("Login"));
+          showDialog("Welcome", response.message, () => {
+            onAuthenticated?.(response);
+            navigation.navigate("Login");
+          });
         }}
       />
     </ScrollView>

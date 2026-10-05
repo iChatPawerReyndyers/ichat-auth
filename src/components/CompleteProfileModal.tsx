@@ -3,14 +3,15 @@ import { Modal, View, Text, StyleSheet } from "react-native";
 import { colors, radii, raisedShadow, spacing } from "../theme/neumorphic";
 import NeumorphicInput from "./NeumorphicInput";
 import NeumorphicButton from "./NeumorphicButton";
-import { completeProfile } from "../api/authApi";
+import { useAuthApi } from "../api/authApi";
 import { useNeumorphicDialog } from "./NeumorphicDialogProvider";
+import type { AuthResponse } from "../types/auth";
 
 interface Props {
   visible: boolean;
   username: string;
   // Called once the profile has been successfully completed.
-  onComplete: () => void;
+  onComplete: (response: AuthResponse) => void;
 }
 
 /**
@@ -24,6 +25,7 @@ interface Props {
  */
 export default function CompleteProfileModal({ visible, username, onComplete }: Props) {
   const showDialog = useNeumorphicDialog();
+  const { completeProfile } = useAuthApi();
   const [birthYear, setBirthYear] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,8 +43,8 @@ export default function CompleteProfileModal({ visible, username, onComplete }: 
 
     setLoading(true);
     try {
-      await completeProfile({ username, birthYear: yearNum, phoneNumber });
-      onComplete();
+      const response = await completeProfile({ username, birthYear: yearNum, phoneNumber });
+      onComplete(response);
     } catch (err: any) {
       showDialog("Couldn't save", err.message ?? "Please try again");
     } finally {
