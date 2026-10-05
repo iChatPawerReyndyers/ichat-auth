@@ -42,7 +42,9 @@ export function Login() {
 brand color, OAuth configuration, and callbacks. `AuthFlow` manages login,
 registration, forgot-password navigation internally and can be rendered inside
 the host's existing shell. Its success response includes username and profile
-status, but currently no numeric user ID or JWT.
+status plus a short-lived, app-audience `accessToken`. The token is for a
+trusted app backend to exchange; do not persist it as a long-lived client
+session token.
 
 ## Native peer dependencies
 
@@ -58,11 +60,12 @@ backend secrets or database credentials in the client.
 
 ## Backend and host identity limitation
 
-The shared backend currently returns no JWT/session token and no Cartculate
-numeric user ID. Hosts that require either for their own protected APIs must
-first add a compatible identity/token contract; the SDK does not fabricate
-one. Add a host's `appId` to the backend free-client list if that app should
-bypass its subscription check. Password-reset SMS requires a configured SMS
+The shared backend does not issue a Cartculate numeric user ID. Cartculate's
+backend must exchange the signed Auth token for its own local user ID. Existing
+Cartculate accounts require one-time linking with their old Cartculate
+credentials; the bridge must not link on username or unverified email alone.
+Add `cartculate` to the Auth backend free-client list if Cartculate should
+bypass its subscription gate. Password-reset SMS requires a configured SMS
 provider on the backend.
 
 ## Demo app development

@@ -46,6 +46,6 @@ export function useAuthApi() {
     resetPassword: (payload: ResetPasswordPayload) =>
       postJson(apiBaseUrl, "/password/reset", payload),
     completeProfile: (payload: CompleteProfilePayload) =>
-      postJson(apiBaseUrl, "/profile/complete", payload),
+      postJson(apiBaseUrl, "/profile/complete", { ...payload, appId }),
   };
 }

@@ -28,6 +28,9 @@ export interface AuthResponse {
   // False when birthYear/phoneNumber are still missing (Google/Facebook
   // sign-ups only). The caller must block on this — see CompleteProfileModal.
   profileComplete?: boolean;
+  // Short-lived, audience-bound token for exchanging the Auth identity with
+  // the calling app's backend. Only present after profile completion.
+  accessToken?: string;
 }
 
 export interface CompleteProfilePayload {
