@@ -1,45 +1,57 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from "react";
+import { StatusBar } from "react-native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import LoginScreen from "./src/screens/LoginScreen";
+import RegisterScreen from "./src/screens/RegisterScreen";
+import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
+import type { RootStackParamList } from "./src/types/auth";
+import { colors } from "./src/theme/neumorphic";
+import { AuthThemeProvider, usePrimaryColor } from "./src/theme/ThemeContext";
+import NeumorphicDialogProvider from "./src/components/NeumorphicDialogProvider";
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+interface AppProps {
+  // Pass your brand color when embedding this app/screens elsewhere.
+  // Omit it to use our default (#F5A623).
+  primaryColor?: string;
+}
 
+export default function App({ primaryColor }: AppProps) {
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <AuthThemeProvider primaryColor={primaryColor}>
+      <NeumorphicDialogProvider>
+        <AppNavigator />
+      </NeumorphicDialogProvider>
+    </AuthThemeProvider>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+function AppNavigator() {
+  const accent = usePrimaryColor();
+
+  const navTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      primary: accent,
+      background: colors.background,
+      card: colors.background,
+      text: colors.textPrimary,
+      border: colors.divider,
+      notification: accent,
+    },
+  };
 
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
+    <NavigationContainer theme={navTheme}>
+      <StatusBar barStyle="dark-content" />
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
